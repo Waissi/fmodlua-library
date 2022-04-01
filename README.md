@@ -7,7 +7,7 @@ This repository provides the source code, a lua module and binaires for Windows 
 I don't provide the fmod libraries as it's not under the same licence, so you still have to download the fmod API for your platform on their [website](https://www.fmod.com/download). 
 
 ## Usage
-This library should work in a any game engine using LuaJIT.
+This library should work with any game engine using LuaJIT.
 
 In your project, add the fmod libraries(fmod.dll + fmodstudio.dll for Windows, libfmod.so + libfmodstudio.so + symlinks for Linux) and fmodluajit(fmodluajit.dll for Windows, libfmodluajit.so for Linux) in the same folder, plus the fmodManager.lua wherever you want.
 
