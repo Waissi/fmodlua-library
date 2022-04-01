@@ -1,5 +1,5 @@
 # fmodluajit
-A dynamic library in C for using [Fmod](https://www.fmod.com/resources/documentation-api?version=2.02&page=welcome.html) with the [Lua JIT ffi library](https://luajit.org/ext_ffi.html)
+A dynamic library in C for using [FmodStudio](https://www.fmod.com/resources/documentation-api?version=2.02&page=welcome.html) with the [Lua JIT ffi library](https://luajit.org/ext_ffi.html)
 
 It's a minimalistic implementation of Fmod calling only essential functions, aimed for 2d projects (no 3D attributes implementation yet). Feel free to expand it as per your needs.
 
