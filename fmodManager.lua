@@ -1,5 +1,5 @@
 local fmod
-local ffi = require("ffi")
+local ffi = require"ffi"
 
 ffi.cdef[[
 
@@ -26,18 +26,17 @@ ffi.cdef[[
     bool PauseEvent(int key, bool paused);
     bool EventIsPlaying(int key);
 
-    float GetParameterByName(int key, const char* name);
     bool SetParamaterByName(int key, const char* name, float value);
-    float GetGlobalParameterByName(const char* name);
+    float GetParameterByName(int key, const char* name);
     bool SetGlobalParamaterByName(const char* name, float value);
+    float GetGlobalParameterByName(const char* name);
 
 ]]
 
 local init = function()
-    local os = love.system.getOS( )
-    if os == "Windows" then
+    if ffi.os == "Windows" then
         fmod = ffi.load("fmodluajit.dll")
-    elseif os == "Linux" then
+    else
         fmod = ffi.load("libs/linux/libfmodluajit.so")
     end
     if fmod.Init() then print"FMOD STUDIO Init" end
@@ -62,8 +61,8 @@ return{
     stop_event = function(key) return fmod.StopEvent(key) end,
     pause_event = function(key, paused) return fmod.PauseEvent(key, paused) end,
     event_is_playing = function(key) return fmod.EventIsPlaying(key) end,
-    get_paramater_by_name = function(key, name) return fmod.GetParameterByName(key, name) end,
     set_parameter_by_name = function(key, name, value) return fmod.SetParamaterByName(key, name, value) end,
-    get_global_paramater_by_name = function(name) return fmod.GetGlobalParameterByName(name) end,
-    set_global_parameter_by_name = function(name, value) return fmod.SetGlobalParamaterByName(name, value) end
+    get_paramater_by_name = function(key, name) return fmod.GetParameterByName(key, name) end,
+    set_global_parameter_by_name = function(name, value) return fmod.SetGlobalParamaterByName(name, value) end,
+    get_global_paramater_by_name = function(name) return fmod.GetGlobalParameterByName(name) end
 }
