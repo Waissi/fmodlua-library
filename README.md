@@ -3,13 +3,13 @@ A dynamic library in C for using [FmodStudio](https://www.fmod.com/resources/doc
 
 It's a minimalistic implementation of Fmod calling only essential functions, aimed for 2d projects (no 3D attributes implementation yet). Feel free to expand it as per your needs.
 
-This repository provides the source code, a lua module and binaires for Windows and Linux in the releases section.
+This repository provides the source code, a lua module and binaires for Windows, MacOS and Linux in the releases section.
 I don't provide the fmod libraries as it's not under the same licence, so you still have to download the fmod API for your platform on their [website](https://www.fmod.com/download). 
 
 ## Usage
 This library should work with any game engine using LuaJIT.
 
-In your project, add the fmod libraries(fmod.dll + fmodstudio.dll for Windows, libfmod.so + libfmodstudio.so + symlinks for Linux) and fmodluajit(fmodluajit.dll for Windows, libfmodluajit.so for Linux) in the same folder, plus the fmodManager.lua wherever you want.
+In your project, add the fmod libraries(fmod.dll + fmodstudio.dll for Windows, libfmod.dylib + libfmodstudio.dylib for MacOS, libfmod.so + libfmodstudio.so + symlinks for Linux) and fmodluajit(fmodluajit.dll for Windows, libfmodluajit.dylib for MacOS, libfmodluajit.so for Linux) in the same folder, plus the fmodManager.lua wherever you want.
 
 Then require fmodManager.lua, init the module and call its functions.
 
