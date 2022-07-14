@@ -4,7 +4,7 @@
 ---------------------------------             FMOD STUDIO SYSTEM         --------------------------------
 */
 
-bool Init()
+bool InitFmod()
 {
 	FMOD_RESULT result = FMOD_Studio_System_Create(&studioSystem, FMOD_VERSION);
     if(result != FMOD_OK){return false;}
@@ -15,15 +15,19 @@ bool Init()
     return true;
 }
 
-bool Update()
+bool UpdateFmod()
 {
     FMOD_RESULT result = FMOD_Studio_System_Update(studioSystem);
     if(result != FMOD_OK){return false;}
     return true;
 }
 
-bool Release()
+bool ReleaseFmod()
 {
+    ReleaseBankList();
+    ReleaseEventList();
+    ReleaseBusList();
+    ReleaseVcaList();
     FMOD_RESULT result = FMOD_Studio_System_Release(studioSystem);
     if(result != FMOD_OK){return false;}
     return true;

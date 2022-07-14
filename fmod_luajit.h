@@ -22,6 +22,15 @@ struct eventNode
 struct eventNode* headEvent = NULL;
 int numEvents = 0;
 
+struct eventCallback
+{
+   FMOD_STUDIO_EVENTINSTANCE* event;
+   void (*callback)();
+   struct eventCallback* next;
+};
+struct eventCallback* headCallback = NULL;
+int numCallbacks = 0;
+
 struct busNode
 {
    FMOD_STUDIO_BUS* bus;
@@ -93,4 +102,44 @@ FMOD_STUDIO_VCA* RetrieveVca(int key)
         }
     }
     return current->vca;
+}
+
+static void ReleaseBankList()
+{
+    while(headBank)
+    {
+        struct bankNode* current = headBank;
+        headBank = current->next;
+        free(current);
+    }
+}
+
+static void ReleaseEventList()
+{
+    while(headEvent)
+    {
+        struct eventNode* current = headEvent;
+        headEvent = current->next;
+        free(current);
+    }
+}
+
+static void ReleaseBusList()
+{
+    while(headBus)
+    {
+        struct busNode* current = headBus;
+        headBus = current->next;
+        free(current);
+    }
+}
+
+static void ReleaseVcaList()
+{
+    while(headVCA)
+    {
+        struct vcaNode* current = headVCA;
+        headVCA = current->next;
+        free(current);
+    }
 }
