@@ -33,10 +33,6 @@ ffi.cdef[[
 
 ]]
 
-love.audio ={
-    stop = function() if fmod.ReleaseFmod() then print"FMOD STUDIO Release" end end
-}
-
 local init = function()
     if ffi.os == "Windows" then
         fmod = ffi.load("fmodluajit.dll")
