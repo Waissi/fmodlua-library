@@ -61,7 +61,6 @@ pub fn build(b: *std.Build) void {
 ### Usage
 
 Examples using [Löve](https://love2d.org/wiki/Main_Page) are provided for both version.
-The fmod libraries (core + studio) should be added in the same folder as this library for Linux, and in the same folder as the one containing the other engine dlls for Windows.
 
 #### Licence
 
