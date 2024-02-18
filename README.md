@@ -7,10 +7,11 @@ This repository provides the source code in order to build the shared library. H
 
 This code should work with any game engine using Lua 5.1 and LuaJIT 2.1. For other versions you might need to change the header files in the lua/include folder and the Windows dlls in lua/lib.
 
-## How to build
+## How to build 
 
-Using gcc: 
 Here are two examples, using GCC and Zig for building the Lua version. For LuaJIT you can do the same, the only differences are that there is no need to include the lua header file and there is no linking against lua51.dll for Windows.
+
+Using GCC
 ```
 LINUX_API=path/to/fmodstudio/linux/api
 
@@ -18,6 +19,7 @@ gcc -c -fPIC lua/fmod_lua.c -I$LINUX_API/core/inc -I$LINUX_API/studio/inc -Ilua/
 LD_RUN_PATH='$ORIGIN' gcc -o libfmodlua.so -Wl,-undefined,dynamic_lookup -shared fmod_lua.o -L$LINUX_API/studio/lib/x86_64 -L$LINUX_API/core/lib/x86_64 -lfmod -lfmodstudio
 ```
 
+Using Zig
 ```zig
 const std = @import("std");
 
