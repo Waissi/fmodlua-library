@@ -1,7 +1,7 @@
 # fmodlua
 An [FmodStudio](https://www.fmod.com/resources/documentation-api?version=2.02&page=welcome.html) implementation in C for building a shared library for Lua or LuaJIT with the [ffi library](https://luajit.org/ext_ffi.html).
 
-It covers the basic functionalities of Fmod, aimed for 2d projects (no 3D attributes implementation yet). Feel free to extend it as per your needs.
+It covers the basic functionalities of Fmod, ideal for 2d projects (no 3D attributes implementation yet). Feel free to extend it as per your needs.
 
 This repository provides the source code in order to build the shared library. However, it doesn't include the fmod libraries as it's not under the same licence, meaning you still have to download the fmod API for your platform on their [website](https://www.fmod.com/download).
 
