@@ -562,7 +562,7 @@ static int set_event_beat_callback()
     return 1;
 }
 
-static const struct luaL_reg interface[] = {
+static const struct luaL_Reg interface[] = {
     {"init", init},
     {"update", update},
     {"release", release},

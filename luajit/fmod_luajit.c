@@ -319,6 +319,10 @@ FMOD_BOOL SetEventBeatCallback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback
 
 float GetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name)
 {
+    if (!event)
+    {
+        return -1.0f;
+    }
     float value;
     float finalValue;
     FMOD_RESULT result = FMOD_Studio_EventInstance_GetParameterByName(event, name, &value, &finalValue);
@@ -331,6 +335,10 @@ float GetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name)
 
 FMOD_BOOL SetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name, float value)
 {
+    if (!event)
+    {
+        return -1.0f;
+    }
     FMOD_RESULT result = FMOD_Studio_EventInstance_SetParameterByName(event, name, value, 1);
     return result == FMOD_OK;
 }

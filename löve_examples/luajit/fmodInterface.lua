@@ -42,8 +42,10 @@ ffi.cdef [[
 local init = function()
     if ffi.os == "Windows" then
         fmod = ffi.load("fmodluajit.dll")
+    elseif ffi.os == "OSX" then
+        fmod = ffi.load("fmod/lib/libfmodluajit.dylib")
     else
-        fmod = ffi.load("fmod/libs/libfmodluajit.so")
+        fmod = ffi.load("fmod/lib/libfmodluajit.so")
     end
     return fmod.InitFmod()
 end
