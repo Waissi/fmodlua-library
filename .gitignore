@@ -1,6 +1,5 @@
 .DS_Store
 deps/FMOD/**
-deps/lua-5.1.5
 **/.zig-cache/**
 **/zig-out/**
 .vscode/**
