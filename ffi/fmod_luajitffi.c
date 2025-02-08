@@ -11,7 +11,7 @@ struct eventCallback
 };
 struct eventCallback *headCallback = NULL;
 
-struct eventCallback *RetrieveCallback(FMOD_STUDIO_EVENTINSTANCE *event)
+struct eventCallback *retrieve_callback(FMOD_STUDIO_EVENTINSTANCE *event)
 {
     if (headCallback == NULL)
     {
@@ -32,7 +32,7 @@ struct eventCallback *RetrieveCallback(FMOD_STUDIO_EVENTINSTANCE *event)
     return current;
 }
 
-static void ReleaseCallbacks()
+static void release_callback()
 {
     while (headCallback)
     {
@@ -46,7 +46,7 @@ static void ReleaseCallbacks()
 ---------------------------------             FMOD STUDIO SYSTEM         --------------------------------
 */
 
-FMOD_BOOL InitFmod()
+FMOD_BOOL init_fmod()
 {
     FMOD_RESULT result = FMOD_Studio_System_Create(&studioSystem, FMOD_VERSION);
     if (result != FMOD_OK)
@@ -58,15 +58,15 @@ FMOD_BOOL InitFmod()
     return result == FMOD_OK;
 }
 
-FMOD_BOOL UpdateFmod()
+FMOD_BOOL update_fmod()
 {
     FMOD_RESULT result = FMOD_Studio_System_Update(studioSystem);
     return result == FMOD_OK;
 }
 
-FMOD_BOOL ReleaseFmod()
+FMOD_BOOL release_fmod()
 {
-    ReleaseCallbacks();
+    release_callback();
     FMOD_RESULT result = FMOD_Studio_System_Release(studioSystem);
     return result == FMOD_OK;
 }
@@ -75,7 +75,7 @@ FMOD_BOOL ReleaseFmod()
 --------------------------------------             BANKS         --------------------------------
 */
 
-FMOD_STUDIO_BANK *LoadBank(const char *path)
+FMOD_STUDIO_BANK *load_bank(const char *path)
 {
     FMOD_STUDIO_BANK *bank = NULL;
     FMOD_RESULT result = FMOD_Studio_System_LoadBankFile(studioSystem, path, FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);
@@ -86,7 +86,7 @@ FMOD_STUDIO_BANK *LoadBank(const char *path)
     return bank;
 }
 
-FMOD_BOOL UnloadBank(FMOD_STUDIO_BANK *bank)
+FMOD_BOOL unload_bank(FMOD_STUDIO_BANK *bank)
 {
     FMOD_RESULT result = FMOD_Studio_Bank_Unload(bank);
     return result == FMOD_OK;
@@ -96,7 +96,7 @@ FMOD_BOOL UnloadBank(FMOD_STUDIO_BANK *bank)
 --------------------------------------             BUSES         --------------------------------
 */
 
-FMOD_STUDIO_BUS *GetBus(const char *path)
+FMOD_STUDIO_BUS *get_bus(const char *path)
 {
     FMOD_STUDIO_BUS *bus = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetBus(studioSystem, path, &bus);
@@ -107,13 +107,13 @@ FMOD_STUDIO_BUS *GetBus(const char *path)
     return bus;
 }
 
-FMOD_BOOL SetBusVolume(FMOD_STUDIO_BUS *bus, float volume)
+FMOD_BOOL set_bus_volume(FMOD_STUDIO_BUS *bus, float volume)
 {
     FMOD_RESULT result = FMOD_Studio_Bus_SetVolume(bus, volume);
     return result == FMOD_OK;
 }
 
-float GetBusVolume(FMOD_STUDIO_BUS *bus)
+float get_bus_volume(FMOD_STUDIO_BUS *bus)
 {
     float volume;
     float finalVolume;
@@ -125,13 +125,13 @@ float GetBusVolume(FMOD_STUDIO_BUS *bus)
     return finalVolume;
 }
 
-FMOD_BOOL MuteBus(FMOD_STUDIO_BUS *bus, FMOD_BOOL mute)
+FMOD_BOOL mute_bus(FMOD_STUDIO_BUS *bus, FMOD_BOOL mute)
 {
     FMOD_RESULT result = FMOD_Studio_Bus_SetMute(bus, mute);
     return result == FMOD_OK;
 }
 
-FMOD_BOOL IsBusMuted(FMOD_STUDIO_BUS *bus)
+FMOD_BOOL is_bus_muted(FMOD_STUDIO_BUS *bus)
 {
     FMOD_BOOL mute;
     FMOD_RESULT result = FMOD_Studio_Bus_GetMute(bus, &mute);
@@ -142,7 +142,7 @@ FMOD_BOOL IsBusMuted(FMOD_STUDIO_BUS *bus)
 -------------------------------------             VCAs         --------------------------------
 */
 
-FMOD_STUDIO_VCA *GetVCA(const char *path)
+FMOD_STUDIO_VCA *get_vca(const char *path)
 {
     FMOD_STUDIO_VCA *vca = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetVCA(studioSystem, path, &vca);
@@ -153,13 +153,13 @@ FMOD_STUDIO_VCA *GetVCA(const char *path)
     return vca;
 }
 
-FMOD_BOOL SetVcaVolume(FMOD_STUDIO_VCA *vca, float volume)
+FMOD_BOOL set_vca_volume(FMOD_STUDIO_VCA *vca, float volume)
 {
     FMOD_RESULT result = FMOD_Studio_VCA_SetVolume(vca, volume);
     return result == FMOD_OK;
 }
 
-float GetVcaVolume(FMOD_STUDIO_VCA *vca)
+float get_vca_volume(FMOD_STUDIO_VCA *vca)
 {
     float volume;
     float finalVolume;
@@ -175,7 +175,7 @@ float GetVcaVolume(FMOD_STUDIO_VCA *vca)
 ---------------------------------------             EVENTS         --------------------------------
 */
 
-FMOD_STUDIO_EVENTINSTANCE *GetEvent(const char *path)
+FMOD_STUDIO_EVENTINSTANCE *get_event(const char *path)
 {
     FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetEvent(studioSystem, path, &eventDescription);
@@ -193,7 +193,7 @@ FMOD_STUDIO_EVENTINSTANCE *GetEvent(const char *path)
     return event;
 }
 
-FMOD_BOOL PlayOneShotEvent(const char *path)
+FMOD_BOOL play_one_shot_event(const char *path)
 {
     FMOD_STUDIO_EVENTINSTANCE *event = NULL;
     FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = NULL;
@@ -219,25 +219,25 @@ FMOD_BOOL PlayOneShotEvent(const char *path)
     return result == FMOD_OK;
 }
 
-FMOD_BOOL PlayEvent(FMOD_STUDIO_EVENTINSTANCE *event)
+FMOD_BOOL play_event(FMOD_STUDIO_EVENTINSTANCE *event)
 {
     FMOD_RESULT result = FMOD_Studio_EventInstance_Start(event);
     return result == FMOD_OK;
 }
 
-FMOD_BOOL StopEvent(FMOD_STUDIO_EVENTINSTANCE *event)
+FMOD_BOOL stop_event(FMOD_STUDIO_EVENTINSTANCE *event)
 {
     FMOD_RESULT result = FMOD_Studio_EventInstance_Stop(event, FMOD_STUDIO_STOP_ALLOWFADEOUT);
     return result == FMOD_OK;
 }
 
-FMOD_BOOL PauseEvent(FMOD_STUDIO_EVENTINSTANCE *event, FMOD_BOOL paused)
+FMOD_BOOL pause_event(FMOD_STUDIO_EVENTINSTANCE *event, FMOD_BOOL paused)
 {
     FMOD_RESULT result = FMOD_Studio_EventInstance_SetPaused(event, paused);
     return result == FMOD_OK;
 }
 
-FMOD_BOOL IsEventPlaying(FMOD_STUDIO_EVENTINSTANCE *event)
+FMOD_BOOL is_event_playing(FMOD_STUDIO_EVENTINSTANCE *event)
 {
     FMOD_STUDIO_PLAYBACK_STATE state;
     FMOD_RESULT result = FMOD_Studio_EventInstance_GetPlaybackState(event, &state);
@@ -257,7 +257,7 @@ FMOD_BOOL IsEventPlaying(FMOD_STUDIO_EVENTINSTANCE *event)
 
 FMOD_RESULT F_CALLBACK EventMarkerCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES *parameters)
 {
-    struct eventCallback *eventCallback = RetrieveCallback(event);
+    struct eventCallback *eventCallback = retrieve_callback(event);
     if (!eventCallback)
     {
         return 0;
@@ -266,9 +266,9 @@ FMOD_RESULT F_CALLBACK EventMarkerCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type,
     return FMOD_OK;
 };
 
-FMOD_BOOL SetEventMarkerCallback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback)(const char *name))
+FMOD_BOOL set_event_marker_callback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback)(const char *name))
 {
-    struct eventCallback *eventCallback = RetrieveCallback(event);
+    struct eventCallback *eventCallback = retrieve_callback(event);
     if (eventCallback)
     {
         return 0;
@@ -286,7 +286,7 @@ FMOD_BOOL SetEventMarkerCallback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callba
 
 FMOD_RESULT F_CALLBACK EventBeatCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES *parameters)
 {
-    struct eventCallback *eventCallback = RetrieveCallback(event);
+    struct eventCallback *eventCallback = retrieve_callback(event);
     if (!eventCallback)
     {
         return 0;
@@ -295,9 +295,9 @@ FMOD_RESULT F_CALLBACK EventBeatCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, F
     return FMOD_OK;
 };
 
-FMOD_BOOL SetEventBeatCallback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback)(int bar, int beat))
+FMOD_BOOL set_event_beat_callback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback)(int bar, int beat))
 {
-    struct eventCallback *eventCallback = RetrieveCallback(event);
+    struct eventCallback *eventCallback = retrieve_callback(event);
     if (eventCallback)
     {
         return 0;
@@ -317,7 +317,7 @@ FMOD_BOOL SetEventBeatCallback(FMOD_STUDIO_EVENTINSTANCE *event, void (*callback
 -----------------------------------             PARAMETERS         --------------------------------
 */
 
-float GetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name)
+float get_parameter_by_name(FMOD_STUDIO_EVENTINSTANCE *event, const char *name)
 {
     if (!event)
     {
@@ -333,7 +333,7 @@ float GetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name)
     return finalValue;
 }
 
-FMOD_BOOL SetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name, float value)
+FMOD_BOOL set_parameter_by_name(FMOD_STUDIO_EVENTINSTANCE *event, const char *name, float value)
 {
     if (!event)
     {
@@ -343,7 +343,7 @@ FMOD_BOOL SetParamaterByName(FMOD_STUDIO_EVENTINSTANCE *event, const char *name,
     return result == FMOD_OK;
 }
 
-float GetGlobalParamaterByName(const char *name)
+float get_global_parameter_by_name(const char *name)
 {
     float value;
     float finalValue;
@@ -355,7 +355,7 @@ float GetGlobalParamaterByName(const char *name)
     return finalValue;
 }
 
-FMOD_BOOL SetGlobalParamaterByName(const char *name, float value)
+FMOD_BOOL set_global_parameter_by_name(const char *name, float value)
 {
     FMOD_RESULT result = FMOD_Studio_System_SetParameterByName(studioSystem, name, value, 1);
     return result == FMOD_OK;
