@@ -7,6 +7,12 @@
 lua_State *luaState = NULL;
 FMOD_STUDIO_SYSTEM *studioSystem = NULL;
 
+union eventCallbackProperties
+{
+    FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES *marker;
+    FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES *beat;
+};
+
 struct eventCallback
 {
     FMOD_STUDIO_EVENTINSTANCE *event;

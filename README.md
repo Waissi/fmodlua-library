@@ -1,5 +1,5 @@
 # fmodlua
-An [FmodStudio](https://www.fmod.com/resources/documentation-api?version=2.02&page=welcome.html) implementation in C for building a shared library for Lua or LuaJIT with the [ffi library](https://luajit.org/ext_ffi.html).
+An [FmodStudio](https://www.fmod.com/resources/documentation-api?version=2.02&page=welcome.html) implementation in C for building a shared library for Lua.
 
 It covers the basic functionalities of Fmod, ideal for 2d projects (no 3D attributes implementation yet). Feel free to extend it as per your needs.
 
@@ -13,13 +13,13 @@ Example using GCC on Linux
 ```
 LINUX_API=path/to/fmodstudio/linux/api
 
-gcc -c -fPIC lua/fmod_lua.c -I$LINUX_API/core/inc -I$LINUX_API/studio/inc -Ilua/include
+gcc -c -fPIC src/fmod_lua.c -I$LINUX_API/core/inc -I$LINUX_API/studio/inc -Isrc
 LD_RUN_PATH='$ORIGIN' gcc -o libfmodlua.so -Wl,-undefined,dynamic_lookup -shared fmod_lua.o -L$LINUX_API/studio/lib/x86_64 -L$LINUX_API/core/lib/x86_64 -lfmod -lfmodstudio
 ```
 
 ### Usage
 
-Examples using [Löve](https://love2d.org/wiki/Main_Page) are provided for both version.
+See example is using [Löve](https://love2d.org/wiki/Main_Page).
 
 #### Licence
 

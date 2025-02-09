@@ -228,21 +228,39 @@ FMOD_BOOL IsEventPlaying(FMOD_STUDIO_EVENTINSTANCE *event)
     return state == FMOD_STUDIO_PLAYBACK_PLAYING && paused == 0;
 }
 
-FMOD_RESULT F_CALLBACK EventMarkerCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES *parameters)
+void F_CALLBACK OnEventCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, void *parameters)
 {
     struct eventCallback *eventCallback = RetrieveEventCallback(event);
     if (!eventCallback)
     {
-        return FMOD_ERR_EVENT_NOTFOUND;
+        return;
     }
-    lua_rawgeti(luaState, LUA_REGISTRYINDEX, eventCallback->registryIndex);
-    lua_pushstring(luaState, parameters->name);
-    lua_pushinteger(luaState, parameters->position);
-    lua_call(luaState, 2, 0);
-    return FMOD_OK;
+
+    union eventCallbackProperties properties;
+
+    switch (type)
+    {
+    case FMOD_STUDIO_EVENT_CALLBACK_TIMELINE_MARKER:
+        lua_rawgeti(luaState, LUA_REGISTRYINDEX, eventCallback->registryIndex);
+        properties.marker = parameters;
+        lua_pushinteger(luaState, type);
+        lua_pushstring(luaState, properties.marker->name);
+        lua_pushinteger(luaState, properties.marker->position);
+        lua_call(luaState, 3, 0);
+        break;
+
+    case FMOD_STUDIO_EVENT_CALLBACK_TIMELINE_BEAT:
+        lua_rawgeti(luaState, LUA_REGISTRYINDEX, eventCallback->registryIndex);
+        properties.beat = parameters;
+        lua_pushinteger(luaState, type);
+        lua_pushinteger(luaState, properties.beat->bar);
+        lua_pushinteger(luaState, properties.beat->beat);
+        lua_call(luaState, 3, 0);
+        break;
+    }
 };
 
-FMOD_BOOL SetEventMarkerCallback(FMOD_STUDIO_EVENTINSTANCE *event, int registryIndex)
+FMOD_BOOL SetEventCallback(FMOD_STUDIO_EVENTINSTANCE *event, int registryIndex)
 {
     struct eventCallback *eventCallback = RetrieveEventCallback(event);
     if (eventCallback)
@@ -250,44 +268,13 @@ FMOD_BOOL SetEventMarkerCallback(FMOD_STUDIO_EVENTINSTANCE *event, int registryI
         return 0;
     }
 
-    struct eventCallback *link = (struct eventCallback *)malloc(sizeof(struct eventCallback));
+    struct eventCallback *link = malloc(sizeof(struct eventCallback));
     link->event = event;
     link->registryIndex = registryIndex;
     link->next = headCallback;
     headCallback = link;
 
-    FMOD_RESULT result = FMOD_Studio_EventInstance_SetCallback(event, (FMOD_STUDIO_EVENT_CALLBACK)EventMarkerCallback, FMOD_STUDIO_EVENT_CALLBACK_TIMELINE_MARKER);
-    return result == FMOD_OK;
-}
-
-FMOD_RESULT F_CALLBACK EventBeatCallback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES *parameters)
-{
-    struct eventCallback *eventCallback = RetrieveEventCallback(event);
-    if (!eventCallback)
-    {
-        return FMOD_ERR_EVENT_NOTFOUND;
-    }
-    lua_rawgeti(luaState, LUA_REGISTRYINDEX, eventCallback->registryIndex);
-    lua_pushinteger(luaState, parameters->bar);
-    lua_pushinteger(luaState, parameters->beat);
-    lua_call(luaState, 2, 0);
-    return FMOD_OK;
-};
-
-FMOD_BOOL SetEventBeatCallback(FMOD_STUDIO_EVENTINSTANCE *event, int registryIndex)
-{
-    struct eventCallback *eventCallback = RetrieveEventCallback(event);
-    if (eventCallback)
-    {
-        return 0;
-    }
-    struct eventCallback *link = (struct eventCallback *)malloc(sizeof(struct eventCallback));
-    link->event = event;
-    link->registryIndex = registryIndex;
-    link->next = headCallback;
-    headCallback = link;
-
-    FMOD_RESULT result = FMOD_Studio_EventInstance_SetCallback(event, (FMOD_STUDIO_EVENT_CALLBACK)EventBeatCallback, FMOD_STUDIO_EVENT_CALLBACK_TIMELINE_BEAT);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_SetCallback(event, (FMOD_STUDIO_EVENT_CALLBACK)OnEventCallback, FMOD_STUDIO_EVENT_CALLBACK_ALL);
     return result == FMOD_OK;
 }
 
@@ -542,22 +529,12 @@ static int get_global_parameter_by_name()
     return 1;
 }
 
-static int set_event_marker_callback()
+static int set_event_callback()
 {
     FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
     lua_pushvalue(luaState, 2);
     int registryIndex = luaL_ref(luaState, LUA_REGISTRYINDEX);
-    FMOD_BOOL result = SetEventMarkerCallback(event, registryIndex);
-    lua_pushboolean(luaState, result);
-    return 1;
-}
-
-static int set_event_beat_callback()
-{
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
-    lua_pushvalue(luaState, 2);
-    int registryIndex = luaL_ref(luaState, LUA_REGISTRYINDEX);
-    FMOD_BOOL result = SetEventBeatCallback(event, registryIndex);
+    FMOD_BOOL result = SetEventCallback(event, registryIndex);
     lua_pushboolean(luaState, result);
     return 1;
 }
@@ -579,8 +556,7 @@ static const struct luaL_Reg interface[] = {
     {"set_global_parameter_by_name", set_global_parameter_by_name},
     {"get_parameter_by_name", get_parameter_by_name},
     {"set_parameter_by_name", set_parameter_by_name},
-    {"set_event_marker_callback", set_event_marker_callback},
-    {"set_event_beat_callback", set_event_beat_callback},
+    {"set_event_callback", set_event_callback},
     {"get_bus", get_bus},
     {"get_bus_volume", get_bus_volume},
     {"set_bus_volume", set_bus_volume},
