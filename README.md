@@ -5,8 +5,6 @@ It covers the basic functionalities of Fmod, ideal for 2d projects (no 3D attrib
 
 This repository provides the source code in order to build the shared library. However, it doesn't include the fmod libraries as it's not under the same licence, meaning you still have to download the fmod API for your platform on their [website](https://www.fmod.com/download).
 
-This code should work with any game engine using Lua 5.1 and LuaJIT 2.1. For other versions you might need to change the header files in the lua/include folder and the Windows dlls in lua/lib.
-
 ## How to build 
 
 Example using GCC on Linux
