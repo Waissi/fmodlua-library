@@ -149,6 +149,11 @@ static int load_bank()
     const char *path = lua_tostring(luaState, 1);
     FMOD_STUDIO_BANK *bank = NULL;
     FMOD_RESULT result = FMOD_Studio_System_LoadBankFile(studioSystem, path, FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
     lua_pushlightuserdata(luaState, bank);
     return 1;
 }
@@ -170,6 +175,11 @@ static int get_bus()
     const char *path = lua_tostring(luaState, 1);
     FMOD_STUDIO_BUS *bus = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetBus(studioSystem, path, &bus);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
     lua_pushlightuserdata(luaState, bus);
     return 1;
 }
@@ -188,8 +198,12 @@ static int get_bus_volume()
     FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
     float volume, finalVolume;
     FMOD_RESULT result = FMOD_Studio_Bus_GetVolume(bus, &volume, &finalVolume);
-    lua_Number returnValue = result == FMOD_OK ? finalVolume : -1.0f;
-    lua_pushnumber(luaState, returnValue);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushnumber(luaState, finalVolume);
     return 1;
 }
 
@@ -220,6 +234,11 @@ static int get_vca()
     const char *path = lua_tostring(luaState, 1);
     FMOD_STUDIO_VCA *vca = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetVCA(studioSystem, path, &vca);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
     lua_pushlightuserdata(luaState, vca);
     return 1;
 }
@@ -238,8 +257,12 @@ static int get_vca_volume()
     FMOD_STUDIO_VCA *vca = lua_touserdata(luaState, 1);
     float volume, finalVolume;
     FMOD_RESULT result = FMOD_Studio_VCA_GetVolume(vca, &volume, &finalVolume);
-    lua_Number returnValue = result == FMOD_OK ? finalVolume : -1.0f;
-    lua_pushnumber(luaState, returnValue);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushnumber(luaState, finalVolume);
     return 1;
 }
 
@@ -255,10 +278,15 @@ static int get_event()
     FMOD_RESULT result = FMOD_Studio_System_GetEvent(studioSystem, path, &eventDescription);
     if (result != FMOD_OK)
     {
-        lua_pushlightuserdata(luaState, instance);
+        lua_pushnil(luaState);
         return 1;
     }
     result = FMOD_Studio_EventDescription_CreateInstance(eventDescription, &instance);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
     lua_pushlightuserdata(luaState, instance);
     return 1;
 }
@@ -387,8 +415,12 @@ static int get_parameter_by_name()
     const char *name = lua_tostring(luaState, 2);
     float value, finalValue;
     FMOD_RESULT result = FMOD_Studio_EventInstance_GetParameterByName(event, name, &value, &finalValue);
-    lua_Number returnValue = result == FMOD_OK ? finalValue : -1.0f;
-    lua_pushnumber(luaState, returnValue);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushnumber(luaState, finalValue);
     return 1;
 }
 
@@ -416,8 +448,12 @@ static int get_global_parameter_by_name()
     const char *name = lua_tostring(luaState, 1);
     float value, finalValue;
     FMOD_RESULT result = FMOD_Studio_System_GetParameterByName(studioSystem, name, &value, &finalValue);
-    lua_Number returnValue = result == FMOD_OK ? finalValue : -1.0f;
-    lua_pushnumber(luaState, returnValue);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushnumber(luaState, finalValue);
     return 1;
 }
 
