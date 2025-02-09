@@ -19,7 +19,7 @@ LD_RUN_PATH='$ORIGIN' gcc -o libfmodlua.so -Wl,-undefined,dynamic_lookup -shared
 
 ### Usage
 
-See example is using [Löve](https://love2d.org/wiki/Main_Page).
+See example using [Löve](https://love2d.org/wiki/Main_Page).
 
 #### Licence
 
