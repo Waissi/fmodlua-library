@@ -13,7 +13,10 @@ function love.load()
     fmod.load_bank("fmod/banks/Desktop/Master.bank")
     fmod.load_bank("fmod/banks/Desktop/Master.strings.bank")
     fmod.load_bank("fmod/banks/Desktop/Music.bank")
-    local instance = fmod.get_event("event:/music_test")
+    local event = fmod.get_event("event:/music_test")
+    if not event then return end
+    --fmod.play_one_shot_event(event)
+    local instance = fmod.create_event_instance(event)
     if not instance then return end
     fmod.play_event(instance)
     fmod.set_event_callback(instance, function(type, param1, param2)

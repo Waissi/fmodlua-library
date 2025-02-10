@@ -13,32 +13,32 @@ union EventCallbackProperties
     FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES *beat;
 };
 
-struct eventCallback
+struct EventCallback
 {
-    FMOD_STUDIO_EVENTINSTANCE *event;
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance;
     int registryIndex;
-    struct eventCallback *next;
+    struct EventCallback *next;
 };
-struct eventCallback *headCallback = NULL;
+struct EventCallback *headCallback = NULL;
 
 static void release_event_callback_list()
 {
     while (headCallback)
     {
-        struct eventCallback *current = headCallback;
+        struct EventCallback *current = headCallback;
         headCallback = current->next;
         free(current);
     }
 }
 
-static struct eventCallback *retrieve_event_callback(FMOD_STUDIO_EVENTINSTANCE *event)
+static struct EventCallback *retrieve_event_callback(FMOD_STUDIO_EVENTINSTANCE *eventInstance)
 {
-    struct eventCallback *current = headCallback;
+    struct EventCallback *current = headCallback;
     if (headCallback == NULL)
     {
         return NULL;
     }
-    while (current->event != event)
+    while (current->eventInstance != eventInstance)
     {
         if (current->next == NULL)
         {
@@ -52,9 +52,9 @@ static struct eventCallback *retrieve_event_callback(FMOD_STUDIO_EVENTINSTANCE *
     return current;
 }
 
-static void release_event_callback(struct eventCallback *eventCallback)
+static void release_event_callback(struct EventCallback *eventCallback)
 {
-    struct eventCallback *current = headCallback;
+    struct EventCallback *current = headCallback;
     if (headCallback == eventCallback)
     {
         headCallback = NULL;
@@ -76,9 +76,9 @@ static void release_event_callback(struct eventCallback *eventCallback)
     free(current->next);
 }
 
-static void F_CALLBACK on_event_callback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *event, void *parameters)
+static void F_CALLBACK on_event_callback(FMOD_STUDIO_EVENT_CALLBACK_TYPE type, FMOD_STUDIO_EVENTINSTANCE *eventInstance, void *parameters)
 {
-    struct eventCallback *eventCallback = retrieve_event_callback(event);
+    struct EventCallback *eventCallback = retrieve_event_callback(eventInstance);
     if (!eventCallback)
     {
         return;
@@ -184,6 +184,29 @@ static int get_bus()
     return 1;
 }
 
+static int set_bus_paused()
+{
+    FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
+    FMOD_BOOL paused = lua_toboolean(luaState, 2);
+    FMOD_RESULT result = FMOD_Studio_Bus_SetPaused(bus, paused);
+    lua_pushboolean(luaState, result == FMOD_OK);
+    return 1;
+}
+
+static int get_bus_paused()
+{
+    FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
+    FMOD_BOOL paused;
+    FMOD_RESULT result = FMOD_Studio_Bus_GetPaused(bus, &paused);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushboolean(luaState, paused);
+    return 1;
+}
+
 static int set_bus_volume()
 {
     FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
@@ -207,7 +230,7 @@ static int get_bus_volume()
     return 1;
 }
 
-static int mute_bus()
+static int set_bus_mute()
 {
     FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
     FMOD_BOOL mute = lua_toboolean(luaState, 2);
@@ -216,12 +239,25 @@ static int mute_bus()
     return 1;
 }
 
-static int bus_is_muted()
+static int get_bus_mute()
 {
     FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
     FMOD_BOOL mute;
     FMOD_RESULT result = FMOD_Studio_Bus_GetMute(bus, &mute);
-    lua_pushboolean(luaState, result == FMOD_OK ? mute : 0);
+    if (result != FMOD_OK)
+    {
+        lua_pushnil(luaState);
+        return 1;
+    }
+    lua_pushboolean(luaState, mute);
+    return 1;
+}
+
+static int stop_all_bus_events()
+{
+    FMOD_STUDIO_BUS *bus = lua_touserdata(luaState, 1);
+    FMOD_RESULT result = FMOD_Studio_Bus_StopAllEvents(bus, FMOD_STUDIO_STOP_ALLOWFADEOUT);
+    lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
@@ -273,7 +309,6 @@ static int get_vca_volume()
 static int get_event()
 {
     const char *path = lua_tostring(luaState, 1);
-    FMOD_STUDIO_EVENTINSTANCE *instance = NULL;
     FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = NULL;
     FMOD_RESULT result = FMOD_Studio_System_GetEvent(studioSystem, path, &eventDescription);
     if (result != FMOD_OK)
@@ -281,7 +316,15 @@ static int get_event()
         lua_pushnil(luaState);
         return 1;
     }
-    result = FMOD_Studio_EventDescription_CreateInstance(eventDescription, &instance);
+    lua_pushlightuserdata(luaState, eventDescription);
+    return 1;
+}
+
+static int create_event_instance()
+{
+    FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = lua_touserdata(luaState, 1);
+    FMOD_STUDIO_EVENTINSTANCE *instance = NULL;
+    FMOD_RESULT result = FMOD_Studio_EventDescription_CreateInstance(eventDescription, &instance);
     if (result != FMOD_OK)
     {
         lua_pushnil(luaState);
@@ -293,89 +336,89 @@ static int get_event()
 
 static int release_event()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
-    FMOD_RESULT result = FMOD_Studio_EventInstance_Stop(event, FMOD_STUDIO_STOP_IMMEDIATE);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_Stop(eventInstance, FMOD_STUDIO_STOP_IMMEDIATE);
     if (result != FMOD_OK)
     {
         lua_pushboolean(luaState, 0);
         return 1;
     }
-    struct eventCallback *eventCallback = retrieve_event_callback(event);
+    struct EventCallback *eventCallback = retrieve_event_callback(eventInstance);
     if (eventCallback)
     {
         luaL_unref(luaState, LUA_REGISTRYINDEX, eventCallback->registryIndex);
         release_event_callback(eventCallback);
     }
-    result = FMOD_Studio_EventInstance_Release(event);
+    result = FMOD_Studio_EventInstance_Release(eventInstance);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
 static int play_one_shot_event()
 {
-    const char *path = lua_tostring(luaState, 1);
-    FMOD_STUDIO_EVENTINSTANCE *event = NULL;
-    FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = NULL;
-    FMOD_RESULT result = FMOD_Studio_System_GetEvent(studioSystem, path, &eventDescription);
+    FMOD_STUDIO_EVENTDESCRIPTION *eventDescription = lua_touserdata(luaState, 1);
+    FMOD_BOOL oneshot;
+    FMOD_RESULT result = FMOD_Studio_EventDescription_IsOneshot(eventDescription, &oneshot);
+    if ((result != FMOD_OK) || (!oneshot))
+    {
+        lua_pushboolean(luaState, 0);
+        return 1;
+    }
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = NULL;
+    result = FMOD_Studio_EventDescription_CreateInstance(eventDescription, &eventInstance);
     if (result != FMOD_OK)
     {
         lua_pushboolean(luaState, 0);
         return 1;
     }
-    result = FMOD_Studio_EventDescription_CreateInstance(eventDescription, &event);
+    result = FMOD_Studio_EventInstance_Start(eventInstance);
     if (result != FMOD_OK)
     {
         lua_pushboolean(luaState, 0);
         return 1;
     }
-    result = FMOD_Studio_EventInstance_Start(event);
-    if (result != FMOD_OK)
-    {
-        lua_pushboolean(luaState, 0);
-        return 1;
-    }
-    result = FMOD_Studio_EventInstance_Release(event);
+    result = FMOD_Studio_EventInstance_Release(eventInstance);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
 static int play_event()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
-    FMOD_RESULT result = FMOD_Studio_EventInstance_Start(event);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_Start(eventInstance);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
 static int stop_event()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
-    FMOD_RESULT result = FMOD_Studio_EventInstance_Stop(event, FMOD_STUDIO_STOP_ALLOWFADEOUT);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_Stop(eventInstance, FMOD_STUDIO_STOP_ALLOWFADEOUT);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
 static int pause_event()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
     FMOD_BOOL pause = lua_toboolean(luaState, 2);
-    FMOD_RESULT result = FMOD_Studio_EventInstance_SetPaused(event, pause);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_SetPaused(eventInstance, pause);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
 
 static int event_is_playing()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
     FMOD_STUDIO_PLAYBACK_STATE state;
-    FMOD_RESULT result = FMOD_Studio_EventInstance_GetPlaybackState(event, &state);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_GetPlaybackState(eventInstance, &state);
     if (result != FMOD_OK)
     {
         lua_pushboolean(luaState, 0);
         return 1;
     }
     FMOD_BOOL paused;
-    result = FMOD_Studio_EventInstance_GetPaused(event, &paused);
+    result = FMOD_Studio_EventInstance_GetPaused(eventInstance, &paused);
     if (result != FMOD_OK)
     {
         lua_pushboolean(luaState, 0);
@@ -387,20 +430,20 @@ static int event_is_playing()
 
 static int set_event_callback()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
-    if (retrieve_event_callback(event))
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
+    if (retrieve_event_callback(eventInstance))
     {
         lua_pushboolean(luaState, 0);
         return 1;
     }
     lua_pushvalue(luaState, 2);
     int registryIndex = luaL_ref(luaState, LUA_REGISTRYINDEX);
-    struct eventCallback *eventCallback = malloc(sizeof(struct eventCallback));
-    eventCallback->event = event;
+    struct EventCallback *eventCallback = malloc(sizeof(struct EventCallback));
+    eventCallback->eventInstance = eventInstance;
     eventCallback->registryIndex = registryIndex;
     eventCallback->next = headCallback;
     headCallback = eventCallback;
-    FMOD_RESULT result = FMOD_Studio_EventInstance_SetCallback(event, (FMOD_STUDIO_EVENT_CALLBACK)on_event_callback, FMOD_STUDIO_EVENT_CALLBACK_ALL);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_SetCallback(eventInstance, (FMOD_STUDIO_EVENT_CALLBACK)on_event_callback, FMOD_STUDIO_EVENT_CALLBACK_ALL);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
@@ -411,10 +454,10 @@ static int set_event_callback()
 
 static int get_parameter_by_name()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
     const char *name = lua_tostring(luaState, 2);
     float value, finalValue;
-    FMOD_RESULT result = FMOD_Studio_EventInstance_GetParameterByName(event, name, &value, &finalValue);
+    FMOD_RESULT result = FMOD_Studio_EventInstance_GetParameterByName(eventInstance, name, &value, &finalValue);
     if (result != FMOD_OK)
     {
         lua_pushnil(luaState);
@@ -426,10 +469,10 @@ static int get_parameter_by_name()
 
 static int set_parameter_by_name()
 {
-    FMOD_STUDIO_EVENTINSTANCE *event = lua_touserdata(luaState, 1);
+    FMOD_STUDIO_EVENTINSTANCE *eventInstance = lua_touserdata(luaState, 1);
     const char *name = lua_tostring(luaState, 2);
     float value = lua_tonumber(luaState, 3);
-    FMOD_BOOL result = FMOD_Studio_EventInstance_SetParameterByName(event, name, value, 1);
+    FMOD_BOOL result = FMOD_Studio_EventInstance_SetParameterByName(eventInstance, name, value, 1);
     lua_pushboolean(luaState, result == FMOD_OK);
     return 1;
 }
@@ -468,6 +511,7 @@ static const struct luaL_Reg interface[] = {
     {"load_bank", load_bank},
     {"unload_bank", unload_bank},
     {"get_event", get_event},
+    {"create_event_instance", create_event_instance},
     {"release_event", release_event},
     {"play_event", play_event},
     {"stop_event", stop_event},
@@ -480,10 +524,13 @@ static const struct luaL_Reg interface[] = {
     {"set_parameter_by_name", set_parameter_by_name},
     {"set_event_callback", set_event_callback},
     {"get_bus", get_bus},
-    {"get_bus_volume", get_bus_volume},
+    {"set_bus_paused", set_bus_paused},
+    {"get_bus_paused", get_bus_paused},
     {"set_bus_volume", set_bus_volume},
-    {"bus_is_muted", bus_is_muted},
-    {"mute_bus", mute_bus},
+    {"get_bus_volume", get_bus_volume},
+    {"get_bus_mute", get_bus_mute},
+    {"set_bus_mute", set_bus_mute},
+    {"stop_all_bus_events", stop_all_bus_events},
     {"get_vca", get_vca},
     {"get_vca_volume", get_vca_volume},
     {"set_vca_volume", set_vca_volume},
